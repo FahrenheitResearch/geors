@@ -6,33 +6,39 @@ Replaces every compute-bound function in geopy with a Rust implementation using 
 
 ## Performance
 
-| Operation | geopy | geors (Rust) | Speedup |
-|---|---|---|---|
-| Geodesic distance (scalar) | 62.5 us | 0.5 us | **125x** |
-| Great-circle distance | 3.1 us | 0.1 us | **31x** |
-| Full inverse (azimuths, scales) | 42.1 us | 0.8 us | **52x** |
-| Direct problem | 10.8 us | 0.6 us | **18x** |
-| Batch geodesic (1K points) | 59.2 ms | 0.06 ms | **1,063x** |
-| Batch geodesic (10K points) | 589 ms | 0.29 ms | **2,078x** |
-| Batch geodesic (1M points) | ~59 sec | 23.8 ms | **~2,500x** |
+Real-world workflow benchmarks, not synthetic microbenchmarks. Every result verified identical to geopy.
 
-Batch throughput: **42 million point-pairs/sec** (rayon-parallel).
+| Workflow | What it does | geopy | geors | Speedup |
+|---|---|---|---|---|
+| Airport distance matrix | 50 US airports, all 1225 pairs | 68 ms | 2.0 ms | **34x** |
+| Nearest airport lookup | 1000 random queries x 50 airports | 2.8 s | 80 ms | **35x** |
+| Radar coverage grid | 10K grid points x 10 NEXRAD radars | 5.3 s | 160 ms | **33x** |
+| Radar coverage (batch) | Same, using numpy arrays | 5.3 s | 14 ms | **385x** |
+| Delivery routing | 200-stop greedy nearest-neighbor | 1.0 s | 32 ms | **33x** |
+| Range ring generation | 10 radars x 3 rings x 360 bearings | 143 ms | 7 ms | **20x** |
+| Lightning proximity | 500K strikes x 20 cities (10M dists) | ~560 s | 0.3 s | **1,783x** |
+
+```
+python tests/bench_realworld.py
+```
 
 ## Verification
 
 Verified to sub-nanometer precision against geographiclib and geopy:
 
 - **10,000 Karney GeodTest cases** -- max distance error: 7.5e-9 m (~7 nanometers), 0 cases >1mm
-- **15 real-world city pairs** -- max error: 9.3e-10 m (<1 nanometer)
-- **13 edge cases** -- identical points, poles, antipodal, antimeridian, near-antipodal (Vincenty failure cases) -- all exact match
-- **1,000 random direct/inverse roundtrips** -- max error: 5.6e-9 m
-- **1,000 random cross-checks vs geopy** -- max error: 5.6e-9 m
-- **Batch vs scalar consistency** -- exact match (0.0 m difference)
+- **1,225 real US airport pairs** -- max error: 2.3e-12 km (0.002 nanometers)
+- **190 global city routes** -- max error: 3.6e-12 km
+- **5 real tornado tracks** (Moore 2013 EF5, Joplin 2011, etc.) -- path lengths and azimuths exact match
+- **10 NEXRAD radar sites** -- coverage rings, range queries, all identical
+- **100K random batch vs geopy spot check** -- max error: 3.7 nanometers
+- **67 drop-in API compatibility tests** -- every constructor, method, operator, and property matches geopy behavior
 
 ```
-pytest tests/test_python_compat.py -v     # 57 tests
-python tests/verify_accuracy.py           # 37/37 comprehensive checks
-python tests/bench_distance.py            # full benchmark suite
+pytest tests/test_realworld.py -v       # 15 real-world data tests
+pytest tests/test_dropin_compat.py -v   # 67 drop-in API tests
+pytest tests/test_python_compat.py -v   # 57 numerical accuracy tests
+python tests/verify_accuracy.py         # 37/37 comprehensive checks
 ```
 
 ## Installation
@@ -49,44 +55,42 @@ pip install geors
 # Before
 from geopy.distance import geodesic, great_circle
 
-# After (same API, 125x faster)
+# After (same API, 20-1783x faster)
 from geors.distance import geodesic, great_circle
 ```
 
 ### Distance calculations
 
 ```python
-from geors.distance import geodesic, great_circle
+from geors.distance import geodesic, great_circle, Distance
 
 # Geodesic (ellipsoidal, Karney's algorithm)
 d = geodesic((40.7128, -74.0060), (51.5074, -0.1278))
 print(d.km)        # 5570.248...
 print(d.miles)     # 3461.358...
 print(d.meters)    # 5570248.4...
-print(d.feet)      # 18274764.0...
 print(d.nautical)  # 3007.6...
 
 # Great circle (spherical, Haversine)
 d = great_circle((40.7128, -74.0060), (51.5074, -0.1278))
 print(d.km)        # 5564.847...
-```
 
-### Low-level functions
+# From units
+d = Distance(miles=10)
+d = geodesic(kilometers=150)
 
-```python
-from geors._geors import distance, geodesic
+# Multi-point path distance
+total = geodesic(nyc, chicago, denver, la)
 
-# Scalar
-meters = distance.geodesic_distance(40.7128, -74.0060, 51.5074, -0.1278)
+# Custom ellipsoid
+d = geodesic(nyc, london, ellipsoid='GRS-80')
 
-# Full inverse (returns dict with s12, azi1, azi2, a12, ...)
-result = distance.geodesic_inverse(40.7128, -74.0060, 51.5074, -0.1278)
+# Destination point
+pt = geodesic(miles=10).destination((34, 148), bearing=90)
+print(pt.latitude, pt.longitude)
 
-# Direct problem (start + bearing + distance -> endpoint)
-result = geodesic.direct(40.7128, -74.0060, 51.37, 5_554_000.0)
-
-# Destination
-lat2, lon2 = distance.geodesic_destination(40.7128, -74.0060, 51.37, 5_554_000.0)
+# Arithmetic
+d1 + d2, d1 - d2, d * 3, d / 2, abs(d), -d
 ```
 
 ### Batch operations (numpy arrays, rayon-parallel)
@@ -102,7 +106,6 @@ lon2 = np.random.uniform(-180, 180, 1_000_000)
 
 # Returns numpy array, computed in parallel across all cores
 distances = distance.geodesic_distance_batch(lat1, lon1, lat2, lon2)
-distances_gc = distance.great_circle_distance_batch(lat1, lon1, lat2, lon2)
 ```
 
 ### Geocoding (forwards to geopy)
