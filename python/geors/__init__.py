@@ -1,5 +1,5 @@
 """
-geors — Rust-powered drop-in replacement for geopy.
+geors -- Rust-powered drop-in replacement for geopy.
 
 Usage:
     from geors.distance import geodesic, great_circle, distance
@@ -7,5 +7,3 @@ Usage:
 """
 
 __version__ = "0.1.0"
-
-from geors.distance import geodesic, great_circle, distance
