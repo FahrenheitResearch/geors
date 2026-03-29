@@ -1,0 +1,3 @@
+exclude target/*
+recursive-exclude target *
+exclude tests/GeodTest-short.dat*
