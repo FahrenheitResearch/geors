@@ -1,0 +1,11 @@
+/target
+__pycache__
+*.pyc
+*.pyd
+*.so
+*.egg-info
+dist/
+.pytest_cache/
+*.whl
+tests/GeodTest-short.dat
+tests/GeodTest-short.dat.gz
