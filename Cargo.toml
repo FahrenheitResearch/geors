@@ -8,7 +8,7 @@ license = "MIT"
 
 [package]
 name = "geors-py"
-version = "0.1.0"
+version = "0.1.1"
 edition.workspace = true
 description = "Python bindings for geors — a Rust-powered drop-in replacement for geopy"
 
