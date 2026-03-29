@@ -1,0 +1,9 @@
+(function() {
+    const implementors = Object.fromEntries([["geodsolve",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.0/core/marker/trait.Send.html\" title=\"trait core::marker::Send\">Send</a> for <a class=\"struct\" href=\"geodsolve/struct.Runner.html\" title=\"struct geodsolve::Runner\">Runner</a>",0,1,["geodsolve::Runner"]]]],["geographiclib_rs",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.0/core/marker/trait.Send.html\" title=\"trait core::marker::Send\">Send</a> for <a class=\"enum\" href=\"geographiclib_rs/enum.Winding.html\" title=\"enum geographiclib_rs::Winding\">Winding</a>",0,1,["geographiclib_rs::polygon_area::Winding"]],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.0/core/marker/trait.Send.html\" title=\"trait core::marker::Send\">Send</a> for <a class=\"struct\" href=\"geographiclib_rs/struct.Geodesic.html\" title=\"struct geographiclib_rs::Geodesic\">Geodesic</a>",0,1,["geographiclib_rs::geodesic::Geodesic"]],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.0/core/marker/trait.Send.html\" title=\"trait core::marker::Send\">Send</a> for <a class=\"struct\" href=\"geographiclib_rs/struct.GeodesicLine.html\" title=\"struct geographiclib_rs::GeodesicLine\">GeodesicLine</a>",0,1,["geographiclib_rs::geodesic_line::GeodesicLine"]],["impl&lt;'a&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.0/core/marker/trait.Send.html\" title=\"trait core::marker::Send\">Send</a> for <a class=\"struct\" href=\"geographiclib_rs/struct.PolygonArea.html\" title=\"struct geographiclib_rs::PolygonArea\">PolygonArea</a>&lt;'a&gt;",0,1,["geographiclib_rs::polygon_area::PolygonArea"]]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":59,"fragment_lengths":[291,1334]}

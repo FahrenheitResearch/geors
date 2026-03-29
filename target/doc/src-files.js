@@ -1,0 +1,2 @@
+createSrcSidebar('[["geodsolve",["",[],["geodsolve.rs"]]],["geographiclib_rs",["",[],["geodesic.rs","geodesic_capability.rs","geodesic_line.rs","geomath.rs","lib.rs","polygon_area.rs"]]]]');
+//{"start":19,"fragment_lengths":[38,129]}

@@ -1,0 +1,24 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+
+[package]
+name = "geors-py"
+version = "0.1.0"
+edition.workspace = true
+description = "Python bindings for geors — a Rust-powered drop-in replacement for geopy"
+
+[lib]
+name = "_geors"
+crate-type = ["cdylib"]
+
+[dependencies]
+geors = { path = "crates/geors" }
+geo-math = { path = "crates/geo-math" }
+pyo3 = { version = "0.23", features = ["extension-module"] }
+numpy = "0.23"
+rayon = "1"
